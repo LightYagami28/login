@@ -10,8 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $username = mysqli_real_escape_string($con, $_POST['username']);
     $email = mysqli_real_escape_string($con, $_POST['email']);
-    $password = mysqli_real_escape_string($con, $_POST['password']);
-    $confirm_password = mysqli_real_escape_string($con, $_POST['confirm_password']);
+    $password = $_POST['password'];  // Non usare mysqli_real_escape_string per password
+    $confirm_password = $_POST['confirm_password'];
 
     if (!empty(trim($username))) {
         if (strlen($username) <= 50) {
@@ -26,11 +26,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!empty(trim($email))) {
         if (strlen($email) <= 50) {
             if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $email_check = "SELECT * FROM signup WHERE email = '$email'";
-                $query = mysqli_query($con, $email_check);
-                if (mysqli_num_rows($query) == 1) {
+                // Prepared statement per prevenire SQL injection
+                $stmt = $con->prepare("SELECT * FROM signup WHERE email = ?");
+                $stmt->bind_param("s", $email);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                if ($result->num_rows == 1) {
                     $email_error = "Email already exists";
                 }
+                $stmt->close();
             } else {
                 $email_error = "Please enter a valid email";
             }
@@ -51,17 +55,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $confirm_password_error = "Confirm password cannot be blank";
     }
 
+    // Verifica della sicurezza della password (opzionale, ma raccomandata)
+    if (!empty($password)) {
+        if (strlen($password) < 8) {
+            $password_error = "Password must be at least 8 characters long";
+        }
+    } else {
+        $password_error = "Password cannot be blank";
+    }
+
     if (empty($username_error) &&
         empty($email_error) &&
         empty($password_error) &&
         empty($confirm_password_error)) {
 
-        $insert = "INSERT INTO signup (username, email, password) VALUES ('$username', '$email', '$password')";
-        $insert_query = mysqli_query($con, $insert);
+        // Hashing della password
+        $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
-        if ($insert_query) {
-            header('location:login.php');
+        // Prepared statement per prevenire SQL injection
+        $stmt = $con->prepare("INSERT INTO signup (username, email, password) VALUES (?, ?, ?)");
+        $stmt->bind_param("sss", $username, $email, $hashed_password);
+        
+        if ($stmt->execute()) {
+            header('Location: login.php');
+            exit();
+        } else {
+            echo "Error: " . $stmt->error;
         }
+        $stmt->close();
     }
 }
 
@@ -73,46 +94,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Sign Up</title>
     <link rel="stylesheet" href="signup.css">
 </head>
 
 <body>
 
-<div class="box">
+    <div class="box">
         <h2>Sign Up</h2>
         <form action="#" method="post">
 
             <div class="input_box">
-                <input type="text" placeholder="Username" name="username" required>
+                <input type="text" placeholder="Username" name="username" required value="<?php echo htmlspecialchars($username); ?>">
             </div>
-            <?php if(!empty($username_error)){ ?>
-                <p class="error"><?php echo $username_error ?></p>
+            <?php if(!empty($username_error)) { ?>
+                <p class="error"><?php echo $username_error; ?></p>
             <?php } ?>
 
             <div class="input_box">
-                <input type="text" placeholder="Email Id" name="email" required>
+                <input type="text" placeholder="Email Id" name="email" required value="<?php echo htmlspecialchars($email); ?>">
             </div>
-            <?php if(!empty($email_error)){ ?>
-                <p class="error"><?php echo $email_error ?></p>
+            <?php if(!empty($email_error)) { ?>
+                <p class="error"><?php echo $email_error; ?></p>
             <?php } ?>
 
             <div class="input_box">
                 <input type="password" placeholder="Create Password" name="password" required>
             </div>
-            <?php if(!empty($password_error)){ ?>
-                <p class="error"><?php echo $password_error ?></p>
+            <?php if(!empty($password_error)) { ?>
+                <p class="error"><?php echo $password_error; ?></p>
             <?php } ?>
 
             <div class="input_box">
                 <input type="password" placeholder="Confirm Password" name="confirm_password" required>
             </div>
-            <?php if(!empty($confirm_password_error)){ ?>
-                <p class="error"><?php echo $confirm_password_error ?></p>
+            <?php if(!empty($confirm_password_error)) { ?>
+                <p class="error"><?php echo $confirm_password_error; ?></p>
             <?php } ?>
 
             <div class="links">By creating an account you agree to <a href="#">Terms & Conditions</a></div>
-
 
             <button type="submit">Create Account</button>
 
@@ -121,3 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         </form>
     </div>
+
+</body>
+
+</html>
