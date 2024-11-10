@@ -1,7 +1,8 @@
 * {
-    padding: 0px;
-    margin: 0px;
-    font-family: sans-serif;
+    padding: 0;
+    margin: 0;
+    font-family: 'Arial', sans-serif; /* Font di fallback aggiunto */
+    box-sizing: border-box;
 }
 
 body {
@@ -9,68 +10,112 @@ body {
     height: 100vh;
     background: linear-gradient(45deg, #3a3c93, #e923b5);
     position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.box{
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50% , -50%);
-    width: 400px;
+.box {
+    width: 100%;
+    max-width: 400px;
     background-color: #fff;
     padding: 40px 20px;
     border-radius: 10px;
-    box-shadow: 0px 5px 20px -5px #000;
+    box-shadow: 0 5px 20px -5px #000;
     text-align: center;
 }
-.box h2{
-    font-size: 40px;
+
+.box h2 {
+    font-size: 36px; /* Adattato per migliore leggibilità */
     font-weight: bold;
     margin-bottom: 30px;
+    color: #333; /* Colore per il titolo */
 }
-.box form .input_box{
+
+.input_box {
     width: 100%;
     margin-top: 20px;
     background-color: #f2f2f2;
     border-radius: 100px;
 }
-.box form .input_box input{
+
+.input_box input {
     width: 90%;
-    font-size: 22px;
-    padding: 12px 0px;
+    font-size: 18px; /* Ridotto per una migliore leggibilità */
+    padding: 12px 0;
     border: none;
     outline: none;
     background-color: transparent;
+    text-align: center;
 }
-.error{
+
+.error {
     color: red;
     text-align: left;
     margin-left: 10px;
     margin-top: 2px;
+    font-size: 14px; /* Ridotto per minore ingombro */
 }
-.box form button{
+
+button {
     width: 100%;
-    font-size: 25px;
+    font-size: 22px;
     font-weight: bold;
     background: linear-gradient(45deg, #3a3c93, #e923b5);
     color: #fff;
-    padding: 10px;
+    padding: 12px;
     border: none;
-    margin: 10px 0px;
+    margin: 10px 0;
     border-radius: 100px;
     cursor: pointer;
-    transition: 0.2s;
+    transition: transform 0.2s, background-color 0.3s ease; /* Transizione più fluida */
 }
-.box form button:active{
-    transform: scale(0.9);
+
+button:hover {
+    background-color: #dd1f6b; /* Aggiunto effetto hover */
 }
-.box form .links{
-    font-size: 16px;
-    margin: 15px 0px;
+
+button:active {
+    transform: scale(0.95); /* Leggero effetto scale per un feedback visivo */
 }
-.box form .links a{
-    font-size: 18px;
+
+.links {
+    font-size: 14px; /* Ridotto per adattarsi meglio ai dispositivi mobili */
+    margin: 15px 0;
+}
+
+.links a {
+    font-size: 16px; /* Aumentato leggermente per la leggibilità */
     font-weight: bold;
     color: blue;
     text-decoration: none;
+    transition: color 0.3s; /* Transizione per un effetto hover fluido */
+}
+
+.links a:hover {
+    color: #ff66cc; /* Colore hover per i link */
+}
+
+/* Media queries per migliorare la responsività */
+@media screen and (max-width: 768px) {
+    .box {
+        width: 90%; /* Ridotto per dispositivi più piccoli */
+        padding: 20px;
+    }
+
+    .box h2 {
+        font-size: 30px;
+    }
+
+    .input_box input {
+        font-size: 16px;
+    }
+
+    button {
+        font-size: 20px;
+    }
+
+    .links {
+        font-size: 12px;
+    }
 }
